@@ -10,6 +10,7 @@ import { getBooleanValidator, getNumberValidator } from '../Validators';
 import { _registerNode } from '../Global';
 
 import { GetSet, IRect, Vector2d } from '../types';
+import { Circle } from './Circle';
 
 export interface Box extends IRect {
   rotation: number;
@@ -247,6 +248,8 @@ export class Transformer extends Group {
   _cursorChange: boolean;
 
   constructor(config?: TransformerConfig) {
+    console.log('transformer init');
+    
     // call super constructor
     super(config);
     this._createElements();
@@ -558,9 +561,11 @@ export class Transformer extends Group {
     this._createAnchor('rotater');
   }
   _createAnchor(name) {
+    console.log('name',name);
+    
     var anchor = new Rect({
       stroke: 'rgb(0, 161, 255)',
-      fill: 'white',
+      fill: 'blue',
       strokeWidth: 1,
       name: name + ' _anchor',
       dragDistance: 0,
@@ -569,6 +574,41 @@ export class Transformer extends Group {
       draggable: true,
       hitStrokeWidth: TOUCH_DEVICE ? 10 : 'auto',
     });
+
+    if (name === 'rotater') {
+      anchor = new Shape({
+        x:-200,
+        y:-200,
+        sceneFunc: function (context, shape) {
+          context.beginPath();
+          context.moveTo(-40, 25);
+          context.lineTo(-25, 25);
+          context.lineTo(-30, 20);
+          context.bezierCurveTo(-30, 20, 0, 0, 30, 20);
+
+          context.lineTo(25, 25);
+          context.lineTo(40, 25);
+          context.lineTo(40, 10);
+          context.lineTo(35, 15);
+          context.bezierCurveTo(35, 15, 0, -7.071, -35, 15);
+          context.lineTo(-40, 10);
+
+          context.closePath();
+      
+          // (!) Konva specific method, it is very important
+          context.fillStrokeShape(shape);
+        },
+        fill: '#00D2FF77',
+        stroke: 'black',
+        strokeWidth: 1,
+        name: name + ' _anchor',
+        dragDistance: 0,
+        // make it draggable,
+        // so activating the anchor will not start drag&drop of any parent
+        draggable: true,
+        hitStrokeWidth: TOUCH_DEVICE ? 10 : 'auto',
+      });
+    }
     var self = this;
     anchor.on('mousedown touchstart', function (e) {
       self._handleMouseDown(e);
